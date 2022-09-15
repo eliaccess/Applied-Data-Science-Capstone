@@ -55,18 +55,18 @@ app.layout = html.Div(children=[html.H1('SpaceX Launch Records Dashboard',
 # Add a callback function for `site-dropdown` as input, `success-pie-chart` as output
 @app.callback(
     Output('success-pie-chart', 'figure'),
-    Input('site-dropdown', 'site')
+    Input('site-dropdown', 'value')
 )
-def cb_success_pie_chart(site):
-    if site == 'ALL':
+def cb_success_pie_chart(value):
+    if value == 'ALL':
         fig = px.pie(spacex_df,
                     values='class', 
                     names='Launch Site', 
                     title='Total success launches per site')
         return fig
     else:
-        title = 'Launches results in the location ' + site
-        fig = px.pie(spacex_df.loc[spacex_df['Launch Site'] == site],
+        title = 'Launches results in the location ' + value
+        fig = px.pie(spacex_df.loc[spacex_df['Launch Site'] == value],
                     names='class', 
                     title=title)
         return fig
@@ -75,21 +75,24 @@ def cb_success_pie_chart(site):
 # Add a callback function for `site-dropdown` and `payload-slider` as inputs, `success-payload-scatter-chart` as output
 @app.callback(
     Output('success-payload-scatter-chart', 'figure'),
-    Input('site-dropdown', 'site'),
-    Input('payload-slider', 'payload')
+    [Input('site-dropdown', 'value'),
+    Input('payload-slider', 'value')]
 )
 def cb_scatter_plot(site, payload):
     if site == 'ALL':
         fig = px.scatter(spacex_df[(spacex_df['Payload Mass (kg)']>=payload[0]) & (spacex_df['Payload Mass (kg)']<=payload[1])],
                         x="Payload Mass (kg)",
-                        y="class", 
+                        y="class",
+                        title='Success count vs Payload mass for every sites',
                         color="Booster Version Category")
         return fig
     else:
         title = 'Launches results in the location ' + site
-        fig = px.scatter(spacex_df.loc[spacex_df['Launch Site'] == site],
-                    names='class', 
-                    title=title)
+        fig = px.scatter(spacex_df[(spacex_df['Payload Mass (kg)']>=payload[0]) & (spacex_df['Payload Mass (kg)']<=payload[1])].loc[spacex_df['Launch Site'] == site],
+                    x="Payload Mass (kg)",
+                    y="class",
+                    title='Success count vs Payload mass in location ' + site,
+                    color="Booster Version Category")
         return fig
 
 # Run the app
